@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajaxget请求</title>
+    <script src="/static/js/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+<form action="">
+    姓名：<input id='username' type="text" name="username"> <br>
+    密码：<input id="password" type="password" name="pasword"><br>
+    <input id="button" type="button" value="提交">
+
+    <script>
+
+        $('#button').click(
+            function(){
+                 username = $('#username').val()
+                password = $('#password').val()
+                url = "/ajax_get_data/?username="+username+"&password="+password
+                $.ajax(
+                    {
+                        url:url,
+                        type:'get',
+                        data:'',
+                        success:function (data) {
+                            console.log(data)
+                        },
+                        error:function (data) {
+
+                        }
+                    }
+                )
+            }
+        )
+
+
+    </script>
+
+</form>
+</body>
+</html>

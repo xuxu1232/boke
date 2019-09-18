@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse,HttpResponseRedirect
 from django.shortcuts import render
 from Article.models import *
 from django.core.paginator import Paginator
@@ -10,6 +10,10 @@ def about(request):
     return render(request,'about.html',locals())
 
 def index(request):
+    # 获取cookie
+    cookie = request.COOKIES
+    print(cookie['name'])
+
     article = Article.objects.order_by('-date')[:6]
     recommend_article = Article.objects.filter(recommend=1)[:7]
     click_article = Article.objects.order_by('-click')[:12]
@@ -175,10 +179,78 @@ def jiaoyan(request):
         content = '密码不正确，登录失败'
         if password == user.password:
             content = '登陆成功'
-
-
-
-
-
     return render(request,'jiaoyan.html',locals())
+
+def ajax_get(request):
+    return render(request,'ajax_get.html')
+
+def ajax_get_data(request):
+    result = {"code":10000,"content":""}
+    data = request.GET
+    username = data.get('username')
+    password = data.get('password')
+    if not username or not password:
+        result['code'] = 10001
+        result['content'] = '用户名，密码不能为空'
+    else:
+        user = User.objects.filter(name=username,password=setPassword(password)).first()
+        if user:
+            result['code'] = 10000
+            result['content'] = '登录成功'
+        else:
+            result['code'] = 10002
+            result['content'] = '用户名或密码错误'
+    return JsonResponse(result)
+
+
+def ajax_post(request):
+    return render(request,'ajax_post.html')
+
+def ajax_post_data(request):
+    result = {"code":10000,"content":""}
+    data = request.POST
+    username = data.get('username')
+    password = data.get('password')
+    if username and password:
+        user = User()
+        user.name = username
+        user.password = setPassword(password)
+        user.save()
+        result['content'] = '添加数据成功'
+    else:
+        result['code'] = 10001
+        result['content'] = '用户名或密码不能为空'
+    return JsonResponse(result)
+
+
+# 完成判断username是否存在的视图
+def check_username(request):
+    result = {'code':10000,'content':''}
+    username = request.GET.get('username')
+    if username:
+        user = User.objects.filter(name=username).first()
+        if user:
+            result['code'] = 10001
+            result['content'] = '用户名已存在'
+        else:
+            result['code'] = 10000
+            result['content'] = ''
+    else:
+        result['code'] = 10002
+        result['content'] = '用户名不能为空'
+    return JsonResponse(result)
+
+def login(request):
+    # 获取登录数据
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = User.objects.filter(name=username,password=setPassword(password)).first()
+        if user:
+            response = HttpResponseRedirect('/index')
+            response.set_cookie('name','xuxu')
+            return response
+
+
+    return render(request,'login.html')
 
