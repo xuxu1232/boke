@@ -6,19 +6,31 @@ from django.core.paginator import Paginator
 # def test(request):
 #     return HttpResponse('testyemian')
 
+
+def loginValid(func):
+    def inner(request,*args,**kwargs):
+        username = request.COOKIES.get('name')
+        if username:
+            return func(request,*args,**kwargs)
+        else:
+            return HttpResponseRedirect('/login/')
+    return inner
+
+
+@loginValid
 def about(request):
     return render(request,'about.html',locals())
 
+
+@loginValid
 def index(request):
-    # 获取cookie
-    cookie = request.COOKIES
-    print(cookie['name'])
 
     article = Article.objects.order_by('-date')[:6]
     recommend_article = Article.objects.filter(recommend=1)[:7]
     click_article = Article.objects.order_by('-click')[:12]
 
     return render(request,'index.html',locals())
+
 
 def listpic(request):
     return render(request,'listpic.html',locals())
@@ -247,10 +259,14 @@ def login(request):
         password = request.POST.get('password')
         user = User.objects.filter(name=username,password=setPassword(password)).first()
         if user:
-            response = HttpResponseRedirect('/index')
+            response = HttpResponseRedirect('/index/')
             response.set_cookie('name','xuxu')
+            # response.session['name'] = 'xuxu'
             return response
-
-
     return render(request,'login.html')
+
+def logout(request):
+    response = HttpResponseRedirect('/login/')
+    response.delete_cookie('name')
+    return response
 

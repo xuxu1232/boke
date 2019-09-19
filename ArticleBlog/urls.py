@@ -39,4 +39,5 @@ urlpatterns = [
     path('ajax_post_data/',views.ajax_post_data),
     path('check_username/',views.check_username),
     path('login/',views.login),
+    path('logout/',views.logout),
 ]
