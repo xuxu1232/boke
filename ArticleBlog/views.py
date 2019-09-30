@@ -9,8 +9,9 @@ from django.core.paginator import Paginator
 
 def loginValid(func):
     def inner(request,*args,**kwargs):
-        username = request.COOKIES.get('name')
-        if username:
+        email = request.COOKIES.get('email')
+        email_session = request.session.get('email')
+        if email and email_session:
             return func(request,*args,**kwargs)
         else:
             return HttpResponseRedirect('/login/')
@@ -23,9 +24,22 @@ def about(request):
 
 
 @loginValid
-def index(request):
+def index(request,page=1):
+    page = int(page)
+    article = Article.objects.order_by('-date')
+    paginator = Paginator(article,6)
+    page_obj = paginator.page(page)
 
-    article = Article.objects.order_by('-date')[:6]
+    current_page = page_obj.number
+    start = current_page - 3
+    end = current_page + 2
+    if start < 0:
+        start = 0
+        end = 5
+    if end > paginator.num_pages:
+        end = paginator.num_pages
+        start = end-5
+    page_range = paginator.page_range[start:end]
     recommend_article = Article.objects.filter(recommend=1)[:7]
     click_article = Article.objects.order_by('-click')[:12]
 
@@ -35,9 +49,10 @@ def index(request):
 def listpic(request):
     return render(request,'listpic.html',locals())
 
-def newslistpic(request,page=1):
+def newslistpic(request,type,page=1):
     page = int(page)
-    article = Article.objects.order_by('-date')
+    type = Type.objects.filter(name=type).first()
+    article = type.article_set.order_by('-date')
     paginator = Paginator(article,6)
     page_obj = paginator.page(page)
     # 使五页为一周期
@@ -118,155 +133,88 @@ def fytest(request):
 
     return HttpResponse('分页测试')
 
-
-def reqtest(request):
-    # print(request)
-    # print(dir(request))
-    # meta = request.META
-    # for key in meta:
-    #     print(key)
-    # print(meta.get('OS'))
-    # print(meta.get('HTTP_HOST'))
-    # print(meta.get('HTTP_USER_AGENT'))
-    # print(meta.get('HTTP_REFERER'))
-
-    # print(request.COOKIES)
-    # print(request.FILES)
-    # print(request.GET)
-    # print(request.POST)
-    # print(request.scheme)
-    # print('--------------')
-    # print(request.path)
-    # print('---------------')
-    # print(request.method)
-    # print('-----------------')
-    # print(request.body)
-    return HttpResponse('姓名：%s,年龄%s'%(request.POST.get('name'),request.POST.get('age')))
-
-def formtest(request):
-    # # 获取输入的数据
-    # search = request.GET
-    # data = search.get('search')
-    # # 在数据库查询数据
-    # article = Article.objects.filter(title__contains=data).all()
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    print(username)
-    print(password)
-    return render(request,'formtest.html',locals())
 import hashlib
 def setPassword(password):
     md5 = hashlib.md5()
     md5.update(password.encode())
     result = md5.hexdigest()
     return result
-from Article.forms import Register
+
 def register(request):
-    register_form = Register()
-    error = ''
-    if request.method == 'POST':
-        data = Register(request.POST)
-        if data.is_valid():
-            clean_data = data.cleaned_data
-            username = clean_data.get('name')
-            password = clean_data.get('password')
-            user = User()
-            user.name = username
-            user.password = setPassword(password)
-            user.save()
-            error = '添加数据成功'
+    email = request.POST.get('email')
+    password = request.POST.get("password")
+    password2 = request.POST.get('password2')
+    if email:
+        user = Author.objects.filter(email=email).first()
+        if user:
+            error = '用户已存在'
         else:
-            error = data.errors
-            print(error)
-
-
+            if password and password2 and password==password2:
+                user = Author()
+                user.email = email
+                user.password = setPassword(password)
+                user.name = email
+                user.save()
+                return HttpResponseRedirect('/login/')
+            else:
+                error = '密码有误'
+    else:
+        error = '邮箱不能为空'
     return render(request,'register.html',locals())
-
-def jiaoyan(request):
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    if password:
-        password = setPassword(password)
-        user = User.objects.filter(name=username).first()
-        content = '密码不正确，登录失败'
-        if password == user.password:
-            content = '登陆成功'
-    return render(request,'jiaoyan.html',locals())
-
-def ajax_get(request):
-    return render(request,'ajax_get.html')
-
-def ajax_get_data(request):
-    result = {"code":10000,"content":""}
-    data = request.GET
-    username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
-        result['code'] = 10001
-        result['content'] = '用户名，密码不能为空'
-    else:
-        user = User.objects.filter(name=username,password=setPassword(password)).first()
-        if user:
-            result['code'] = 10000
-            result['content'] = '登录成功'
-        else:
-            result['code'] = 10002
-            result['content'] = '用户名或密码错误'
-    return JsonResponse(result)
-
-
-def ajax_post(request):
-    return render(request,'ajax_post.html')
-
-def ajax_post_data(request):
-    result = {"code":10000,"content":""}
-    data = request.POST
-    username = data.get('username')
-    password = data.get('password')
-    if username and password:
-        user = User()
-        user.name = username
-        user.password = setPassword(password)
-        user.save()
-        result['content'] = '添加数据成功'
-    else:
-        result['code'] = 10001
-        result['content'] = '用户名或密码不能为空'
-    return JsonResponse(result)
-
-
-# 完成判断username是否存在的视图
-def check_username(request):
-    result = {'code':10000,'content':''}
-    username = request.GET.get('username')
-    if username:
-        user = User.objects.filter(name=username).first()
-        if user:
-            result['code'] = 10001
-            result['content'] = '用户名已存在'
-        else:
-            result['code'] = 10000
-            result['content'] = ''
-    else:
-        result['code'] = 10002
-        result['content'] = '用户名不能为空'
-    return JsonResponse(result)
 
 def login(request):
     # 获取登录数据
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        user = User.objects.filter(name=username,password=setPassword(password)).first()
+        user = Author.objects.filter(email=email,password=setPassword(password)).first()
+        print(user)
         if user:
             response = HttpResponseRedirect('/index/')
-            response.set_cookie('name','xuxu')
-            # response.session['name'] = 'xuxu'
+            response.set_cookie('email',email)
+            request.session['email'] = email
             return response
-    return render(request,'login.html')
+        else:
+            error = '用户不存在'
+    return render(request,'login.html',locals())
 
 def logout(request):
     response = HttpResponseRedirect('/login/')
-    response.delete_cookie('name')
+    response.delete_cookie('email')
+    del request.session['email']
     return response
 
+
+# 添加博文
+@loginValid
+def addarticle(request):
+    type = Type.objects.all()
+    return render(request,'addarticle.html',locals())
+@loginValid
+def add_article(request):
+    if request.method == 'POST':
+        email = request.COOKIES.get('email')
+        title = request.POST.get('title')
+        print(title)
+        content = request.POST.get('content')
+        description = request.POST.get('description')
+        type = request.POST.get('article_type')
+        print(type)
+        article = Article()
+        article.title = title
+        article.content = content
+        article.description = description
+        article.author = Author.objects.filter(email=email).first()
+        if request.FILES.get('picture'):
+            article.picture = request.FILES.get('picture')
+        article.save()
+        article = Article.objects.filter(title__contains=title).order_by('-date').first()
+        type = Type.objects.get(id=type)
+        article.type.add(type)
+        article.save()
+    return render(request,'add_article.html',locals())
+
+def searcharticle(request):
+    title = request.GET.get('keyboard')
+    article = Article.objects.filter(title__contains=title)
+    return render(request,'search_article.html',locals())

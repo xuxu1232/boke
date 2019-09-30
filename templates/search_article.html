@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for one in article %}
+    <div style="text-align: center;">
+    <h3><a href="/articledetails/{{ one.id }}">111</a></h3>
+      <figure><div  style="margin:0 auto;width:550px;"><img src="/static/{{ one.picture }}" alt="111"></div></figure>
+      <ul>
+        <p>111</p>
+        <a title="111" href="/articledetails/{{ one.id }}" target="_blank" class="readmore">阅读全文&gt;&gt;</a>
+      </ul>
+      <p class="dateview"><span>{{ one.date }}</span><span>作者：{{ one.author }}</span><span>个人博客：[<a href="/jstt/bj/">{{ one.type.first }}</a>]</span></p>
+    </div>
+    {% endfor%}
+{% endblock %}

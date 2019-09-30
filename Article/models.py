@@ -8,9 +8,10 @@ GENDER_LIST = (
 )
 class Author(models.Model):
     name = models.CharField(max_length=32,verbose_name='作者姓名')
-    age = models.IntegerField(verbose_name='作者年龄')
+    age = models.IntegerField(null=True,verbose_name='作者年龄')
     gender = models.IntegerField(choices=GENDER_LIST,verbose_name='作者性别',default=1)
-    email = models.CharField(max_length=32,verbose_name='作者邮箱')
+    email = models.EmailField(max_length=32,verbose_name='作者邮箱')
+    password = models.CharField(max_length=32)
 
     def __str__(self):
         return self.name

@@ -5,12 +5,12 @@
 <title>个人博客模板古典系列之――江南墨卷</title>
 <meta name="keywords" content="个人博客模板古典系列之――江南墨卷" />
 <meta name="description" content="个人博客模板古典系列之――江南墨卷" />
-<link href="/static/css/base.css" rel="stylesheet">
-<link href="/static/css/main.css" rel="stylesheet">
+<link href="/static/css1/base.css" rel="stylesheet">
+<link href="/static/css1/main.css" rel="stylesheet">
 <!--[if lt IE 9]>
-<script src="/static/js/modernizr.js"></script>
+<script src="/static/js1/modernizr.js"></script>
 <![endif]-->
-<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script type="text/javascript" src="/static/js1/jquery.js"></script>
     {% block js_css %}
     {% endblock %}
 </head>
@@ -21,12 +21,13 @@
     <div class="contenttop">
       <div class="logo f_l">个人博客模板古典系列之――江南墨卷</div>
       <div class="search f_r">
-        <form action="/e/search/index.php" method="post" name="searchform" id="searchform">
+        <form action="/searcharticle/" >
           <input name="keyboard" id="keyboard" class="input_text" value="请输入关键字" style="color: rgb(153, 153, 153);" onfocus="if(value=='请输入关键字'){this.style.color='#000';value=''}" onblur="if(value==''){this.style.color='#999';value='请输入关键字'}" type="text">
           <input name="show" value="title" type="hidden">
           <input name="tempid" value="1" type="hidden">
           <input name="tbname" value="news" type="hidden">
-          <input name="Submit" class="input_submit" value="搜索" type="submit">
+          <input name="Submit" class="input_submit" value="搜索" type="submit"><br>
+            <a href="/logout/" ><p class="input_submit" style="width: 50px;height: 27px;text-align: center;float: right;margin-right:17px;margin-top:5px;">登出</p></a>
         </form>
       </div>
       <div class="blank"></div>
@@ -42,12 +43,13 @@
             </li>
             <li><a href="#">我的日记</a>
               <ul>
-                <li><a href="/newslistpic">个人日记</a></li>
-                <li><a href="/newslistpic">学习笔记</a></li>
+                <li><a href="/newslistpic/个人日记/1">个人日记</a></li>
+                <li><a href="/newslistpic/学习笔记/1">学习笔记</a></li>
               </ul>
             </li>
-            <li><a href="/newslistpic">技术文章</a> </li>
+            <li><a href="/newslistpic/技术文章/1">技术文章</a> </li>
             <li><a href="#">给我留言</a> </li>
+              <li><a href="/addarticle/">添加博文</a> </li>
           </ul>
         </div>
       </nav>
@@ -78,5 +80,7 @@
     </div>
   </footer>
 </div>
+{% block script %}
+{% endblock %}
 </body>
 </html>

@@ -28,21 +28,21 @@
 {#      </div>#}
     <div class="pagelist">
 
-            <a href="/newslistpic/1">首页</a>
+            <a href="/newslistpic/{{ type }}/1">首页</a>
 
             {% if page_obj.has_previous %}
-                <a href="/newslistpic/{{ page_obj.previous_page_number }}">上一页</a>
+                <a href="/newslistpic/{{ type }}/{{ page_obj.previous_page_number }}">上一页</a>
             {% endif %}
 
             {% for page in page_range %}
-                <a href="/newslistpic/{{ page }}">{{ page }}</a>
+                <a href="/newslistpic/{{ type }}/{{ page }}">{{ page }}</a>
             {% endfor %}
 
             {% if page_obj.has_next %}
-                <a href="/newslistpic/{{ page_obj.next_page_number }}">下一页</a>
+                <a href="/newslistpic/{{ type }}/{{ page_obj.next_page_number }}">下一页</a>
             {% endif %}
 
-            <a href="/newslistpic/{{ paginator.num_pages }}">尾页</a>
+            <a href="/newslistpic/{{ type }}/{{ paginator.num_pages }}">尾页</a>
       </div>
     </div>
   </div>

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+
 {% block js_css %}
-    <link href="/static/css/index.css" rel="stylesheet">
+    <link href="/static/css1/index.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
     <div class="jztop"></div>
   <div class="container">
     <div class="bloglist f_l">
-        {% for one in article %}
+        {% for one in page_obj %}
 
     <h3><a href="/articledetails/{{ one.id }}">{{ one.title }}</a></h3>
       <figure><img src="/static/{{ one.picture }}" alt="{{ one.title }}"></figure>
@@ -50,7 +51,25 @@
           {% endfor %}
         </ul>
       </div>
-      <div class="ad"> <img src="/static/images/03.jpg"> </div>
+      <div class="ad"> <img src="/static/images1/03.jpg"> </div>
+    <div class="pagelist">
+
+            <a href="/index/1">首页</a>
+
+            {% if page_obj.has_previous %}
+                <a href="/index/{{ page_obj.previous_page_number }}">上一页</a>
+            {% endif %}
+
+            {% for page in page_range %}
+                <a href="/index/{{ page }}">{{ page }}</a>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="/index/{{ page_obj.next_page_number }}">下一页</a>
+            {% endif %}
+
+            <a href="/index/{{ paginator.num_pages }}">尾页</a>
+      </div>
     </div>
   </div>
   <!-- container代码 结束 -->
